@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Visitor Detector</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: #f0f0f0;
+            padding: 50px;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .visitor {
+            color: green;
+            font-weight: bold;
+            font-size: 24px;
+        }
+        .no-visitor {
+            color: blue;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚪 SMART VISITOR DETECTOR</h1>
+
+        <!-- Status Tamu -->
+        {% if data.distance < 100 %}
+            <div class="visitor">🔔 ADA TAMU!</div>
+        {% else %}
+            <div class="no-visitor">💤 TENANG</div>
+        {% endif %}
+
+        <!-- Info Jarak -->
+        <p>Jarak: <strong>{{ data.distance }} cm</strong></p>
+
+        <p><em>Website ini terintegrasi dengan sensor IoT</em></p>
+    </div>
+</body>
+</html>
