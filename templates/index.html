@@ -14,15 +14,35 @@
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            max-width: 500px;
+            margin: 0 auto;
         }
-        .visitor {
-            color: green;
+        .visitor-detected {
+            color: #d63031;
             font-weight: bold;
             font-size: 24px;
+            background: #ffeaa7;
+            padding: 15px;
+            border-radius: 5px;
+            border: 2px solid #d63031;
         }
-        .no-visitor {
-            color: blue;
+        .area-clear {
+            color: #00b894;
             font-size: 24px;
+            background: #55efc4;
+            padding: 15px;
+            border-radius: 5px;
+            border: 2px solid #00b894;
+        }
+        .distance {
+            font-size: 20px;
+            margin: 20px 0;
+            color: #2d3436;
+        }
+        .info {
+            color: #636e72;
+            font-size: 14px;
+            margin: 5px 0;
         }
     </style>
 </head>
@@ -30,17 +50,66 @@
     <div class="container">
         <h1>🚪 SMART VISITOR DETECTOR</h1>
 
-        <!-- Status Tamu -->
-        {% if data.distance < 100 %}
-            <div class="visitor">🔔 ADA TAMU!</div>
-        {% else %}
-            <div class="no-visitor">💤 TENANG</div>
-        {% endif %}
+        <div id="status-display">
+            <!-- Default display -->
+            <div class="area-clear">💤 AREA CLEAR</div>
+        </div>
 
-        <!-- Info Jarak -->
-        <p>Jarak: <strong>{{ data.distance }} cm</strong></p>
+        <div class="distance">
+            📏 Jarak: <strong id="distance-value">0 cm</strong>
+        </div>
 
-        <p><em>Website ini terintegrasi dengan sensor IoT</em></p>
+        <div class="info">
+            🔄 Status API: <span id="status-text">AREA_CLEAR</span>
+        </div>
+
+        <div class="info">
+            ⏰ Last update: <span id="timestamp">Loading...</span>
+        </div>
     </div>
+
+    <script>
+        // Function untuk update data dari Flask API
+        async function updateVisitorData() {
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+
+                console.log('📡 Data dari Flask:', data);
+
+                // Update tampilan berdasarkan data
+                const statusDisplay = document.getElementById('status-display');
+                const distanceElement = document.getElementById('distance-value');
+                const statusTextElement = document.getElementById('status-text');
+                const timestampElement = document.getElementById('timestamp');
+
+                // Update jarak
+                distanceElement.textContent = data.distance.toFixed(1) + ' cm';
+
+                // Update status text
+                statusTextElement.textContent = data.status;
+
+                // Update timestamp
+                const time = new Date(data.timestamp * 1000);
+                timestampElement.textContent = time.toLocaleTimeString();
+
+                // LOGIC YANG SAMA DENGAN ESP32: JARAK_AMAN = 50
+                if (data.distance < 50) {
+                    statusDisplay.innerHTML = '<div class="visitor-detected">🔔 VISITOR DETECTED!</div>';
+                } else {
+                    statusDisplay.innerHTML = '<div class="area-clear">💤 AREA CLEAR</div>';
+                }
+
+            } catch (error) {
+                console.error('❌ Error fetching data:', error);
+            }
+        }
+
+        // Auto-refresh setiap 2 detik (sama seperti ESP32)
+        setInterval(updateVisitorData, 2000);
+
+        // Load data pertama kali
+        updateVisitorData();
+    </script>
 </body>
 </html>
