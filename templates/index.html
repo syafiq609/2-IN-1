@@ -1,115 +1,424 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-    <title>Visitor Detector</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Visitor Detector - IoT System</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background: #f0f0f0;
-            padding: 50px;
+        /* === MODERN CSS VARIABLES === */
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5648a6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #1f2937;
+            --light: #f8fafc;
+            --glass: rgba(255, 255, 255, 0.1);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
+
+        /* === BASE STYLES === */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--dark);
+        }
+
         .container {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            max-width: 500px;
+            max-width: 1200px;
             margin: 0 auto;
         }
-        .visitor-detected {
-            color: #d63031;
+
+        /* === HEADER === */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+        }
+
+        /* === GLASS MORPHISM CARD === */
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: var(--shadow);
+            color: white;
+        }
+
+        /* === MAIN DASHBOARD GRID === */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* === STATUS CARD === */
+        .status-card {
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .status-card.visitor-detected {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            animation: pulse 2s infinite;
+        }
+
+        .status-card.area-clear {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .status-icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+        }
+
+        .status-text {
+            font-size: 1.8rem;
             font-weight: bold;
-            font-size: 24px;
-            background: #ffeaa7;
+            margin-bottom: 10px;
+        }
+
+        .distance-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+
+        /* === INFO CARD === */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .info-item {
+            background: rgba(255, 255, 255, 0.1);
             padding: 15px;
-            border-radius: 5px;
-            border: 2px solid #d63031;
+            border-radius: 12px;
+            text-align: center;
         }
-        .area-clear {
-            color: #00b894;
-            font-size: 24px;
-            background: #55efc4;
-            padding: 15px;
-            border-radius: 5px;
-            border: 2px solid #00b894;
+
+        .info-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 5px;
         }
-        .distance {
-            font-size: 20px;
-            margin: 20px 0;
-            color: #2d3436;
+
+        .info-value {
+            font-size: 1.2rem;
+            font-weight: bold;
         }
-        .info {
-            color: #636e72;
-            font-size: 14px;
-            margin: 5px 0;
+
+        /* === HISTORY CARD === */
+        .history-card {
+            grid-column: 1 / -1;
+        }
+
+        .history-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .history-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .history-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+
+        .history-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .status-visitor {
+            background: #ef4444;
+        }
+
+        .status-clear {
+            background: #10b981;
+        }
+
+        /* === ANIMATIONS === */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+
+        /* === LIVE INDICATOR === */
+        .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            background: #10b981;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            margin-right: 6px;
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🚪 SMART VISITOR DETECTOR</h1>
-
-        <div id="status-display">
-            <!-- Default display -->
-            <div class="area-clear">💤 AREA CLEAR</div>
+        <!-- HEADER -->
+        <div class="header">
+            <h1>🚪 Smart Visitor Detector</h1>
+            <p>Real-time IoT Monitoring System</p>
         </div>
 
-        <div class="distance">
-            📏 Jarak: <strong id="distance-value">0 cm</strong>
+        <!-- MAIN DASHBOARD -->
+        <div class="dashboard-grid">
+            <!-- STATUS CARD -->
+            <div class="glass-card status-card fade-in" id="status-card">
+                <div class="status-icon" id="status-icon">💤</div>
+                <div class="status-text" id="status-text">AREA CLEAR</div>
+                <div class="distance-value" id="distance-value">0 cm</div>
+                <div class="info-label">Jarak objek terdeteksi</div>
+            </div>
+
+            <!-- INFO CARD -->
+            <div class="glass-card info-card fade-in">
+                <h3 style="margin-bottom: 20px;">📊 System Info</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Status Sensor</div>
+                        <div class="info-value" id="sensor-status">ONLINE</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Response Time</div>
+                        <div class="info-value" id="response-time">- ms</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Total Kunjungan</div>
+                        <div class="info-value" id="total-visitors">0</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Update Terakhir</div>
+                        <div class="info-value" id="last-update">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HISTORY CARD -->
+            <div class="glass-card history-card fade-in">
+                <div class="history-title">
+                    <h3>📝 Riwayat Kunjungan</h3>
+                    <span class="live-indicator">
+                        <span class="live-dot"></span>
+                        LIVE
+                    </span>
+                </div>
+                <div class="history-list" id="history-list">
+                    <div class="history-item">
+                        <span>System started</span>
+                        <span class="history-status status-clear">CLEAR</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="info">
-            🔄 Status API: <span id="status-text">AREA_CLEAR</span>
-        </div>
-
-        <div class="info">
-            ⏰ Last update: <span id="timestamp">Loading...</span>
+        <!-- FOOTER -->
+        <div class="glass-card" style="text-align: center;">
+            <p>IoT Project - SMK Kelas 12 | Real-time Visitor Detection System</p>
         </div>
     </div>
 
     <script>
-        // Function untuk update data dari Flask API
-        async function updateVisitorData() {
+        // Global variables
+        let visitorHistory = [];
+        let totalVisitors = 0;
+        let lastUpdateTime = Date.now();
+
+        // DOM Elements
+        const statusCard = document.getElementById('status-card');
+        const statusIcon = document.getElementById('status-icon');
+        const statusText = document.getElementById('status-text');
+        const distanceValue = document.getElementById('distance-value');
+        const sensorStatus = document.getElementById('sensor-status');
+        const responseTime = document.getElementById('response-time');
+        const totalVisitorsElement = document.getElementById('total-visitors');
+        const lastUpdate = document.getElementById('last-update');
+        const historyList = document.getElementById('history-list');
+
+        // Update visitor history
+        function updateVisitorHistory(distance, status, timestamp) {
+            const time = new Date(timestamp * 1000);
+            const timeString = time.toLocaleTimeString();
+
+            const historyItem = {
+                time: timeString,
+                distance: distance,
+                status: status,
+                timestamp: timestamp
+            };
+
+            visitorHistory.unshift(historyItem);
+            if (visitorHistory.length > 10) {
+                visitorHistory = visitorHistory.slice(0, 10);
+            }
+
+            // Update total visitors
+            if (status === 'VISITOR_DETECTED') {
+                totalVisitors++;
+                totalVisitorsElement.textContent = totalVisitors;
+            }
+
+            // Update history list
+            updateHistoryDisplay();
+        }
+
+        // Update history display
+        function updateHistoryDisplay() {
+            historyList.innerHTML = '';
+
+            if (visitorHistory.length === 0) {
+                historyList.innerHTML = '<div class="history-item">Tidak ada riwayat</div>';
+                return;
+            }
+
+            visitorHistory.forEach(item => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item fade-in';
+
+                historyItem.innerHTML = `
+                    <span>${item.time} - ${item.distance.toFixed(1)} cm</span>
+                    <span class="history-status ${item.status === 'VISITOR_DETECTED' ? 'status-visitor' : 'status-clear'}">
+                        ${item.status === 'VISITOR_DETECTED' ? 'VISITOR' : 'CLEAR'}
+                    </span>
+                `;
+
+                historyList.appendChild(historyItem);
+            });
+        }
+
+        // Update dashboard with new data
+        function updateDashboard(data) {
+            const startTime = Date.now();
+
+            // Update basic info
+            distanceValue.textContent = data.distance.toFixed(1) + ' cm';
+            lastUpdate.textContent = new Date().toLocaleTimeString();
+
+            // Update status card based on distance (same logic as ESP32)
+            if (data.distance < 50) {
+                statusCard.className = 'glass-card status-card visitor-detected fade-in';
+                statusIcon.textContent = '🔔';
+                statusText.textContent = 'VISITOR DETECTED!';
+                statusText.style.color = 'white';
+            } else {
+                statusCard.className = 'glass-card status-card area-clear fade-in';
+                statusIcon.textContent = '💤';
+                statusText.textContent = 'AREA CLEAR';
+                statusText.style.color = 'white';
+            }
+
+            // Update visitor history
+            updateVisitorHistory(data.distance, data.status, data.timestamp);
+
+            // Calculate response time
+            const endTime = Date.now();
+            const responseTimeMs = endTime - startTime;
+            responseTime.textContent = responseTimeMs + ' ms';
+
+            lastUpdateTime = Date.now();
+        }
+
+        // Fetch data from Flask API
+        async function fetchData() {
             try {
+                const startTime = Date.now();
                 const response = await fetch('/api/status');
                 const data = await response.json();
+                const endTime = Date.now();
 
-                console.log('📡 Data dari Flask:', data);
+                sensorStatus.textContent = 'ONLINE';
+                sensorStatus.style.color = '#10b981';  // ✅ FIXED: Warna hijau langsung
 
-                // Update tampilan berdasarkan data
-                const statusDisplay = document.getElementById('status-display');
-                const distanceElement = document.getElementById('distance-value');
-                const statusTextElement = document.getElementById('status-text');
-                const timestampElement = document.getElementById('timestamp');
-
-                // Update jarak
-                distanceElement.textContent = data.distance.toFixed(1) + ' cm';
-
-                // Update status text
-                statusTextElement.textContent = data.status;
-
-                // Update timestamp
-                const time = new Date(data.timestamp * 1000);
-                timestampElement.textContent = time.toLocaleTimeString();
-
-                // LOGIC YANG SAMA DENGAN ESP32: JARAK_AMAN = 50
-                if (data.distance < 50) {
-                    statusDisplay.innerHTML = '<div class="visitor-detected">🔔 VISITOR DETECTED!</div>';
-                } else {
-                    statusDisplay.innerHTML = '<div class="area-clear">💤 AREA CLEAR</div>';
-                }
-
+                updateDashboard(data);
             } catch (error) {
-                console.error('❌ Error fetching data:', error);
+                console.error('Error fetching data:', error);
+                sensorStatus.textContent = 'OFFLINE';
+                sensorStatus.style.color = '#ef4444';  // ✅ FIXED: Warna merah langsung
             }
         }
 
-        // Auto-refresh setiap 2 detik (sama seperti ESP32)
-        setInterval(updateVisitorData, 2000);
+        // Auto-refresh every second
+        setInterval(fetchData, 1000);
 
-        // Load data pertama kali
-        updateVisitorData();
+        // Initial load
+        fetchData();
     </script>
 </body>
 </html>
