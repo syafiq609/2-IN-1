@@ -329,13 +329,13 @@
                 visitorHistory = visitorHistory.slice(0, 10);
             }
 
-            // Update total visitors
-            if (status === 'VISITOR_DETECTED') {
+            // PERBAIKAN: Bandingkan dengan STATUS BAHASA INDONESIA
+            if (status === 'ADA TAMU') {
                 totalVisitors++;
                 totalVisitorsElement.textContent = totalVisitors;
             }
 
-            // Update history list
+            // Update history display
             updateHistoryDisplay();
         }
 
@@ -352,9 +352,9 @@
                 const historyItem = document.createElement('div');
                 historyItem.className = 'history-item fade-in';
 
-                // Konversi status ke bahasa Indonesia
-                let statusText = item.status === 'VISITOR_DETECTED' ? 'TAMU' : 'TENANG';
-                let statusClass = item.status === 'VISITOR_DETECTED' ? 'status-tamu' : 'status-tenang';
+                // PERBAIKAN: Langsung pakai status dari data
+                let statusText = item.status;
+                let statusClass = item.status === 'ADA TAMU' ? 'status-tamu' : 'status-tenang';
 
                 historyItem.innerHTML = `
                     <span>${item.time} - ${item.distance.toFixed(1)} cm</span>
@@ -375,8 +375,8 @@
             distanceValue.textContent = data.distance.toFixed(1) + ' cm';
             lastUpdate.textContent = new Date().toLocaleTimeString();
 
-            // Update status card based on distance (same logic as ESP32)
-            if (data.distance < 50) {
+            // PERBAIKAN: Bandingkan dengan STATUS BAHASA INDONESIA
+            if (data.status === 'ADA TAMU') {
                 statusCard.className = 'glass-card status-card ada-tamu fade-in';
                 statusIcon.textContent = '🔔';
                 statusText.textContent = 'ADA TAMU!';
